@@ -108,23 +108,24 @@ def shortest_path(source, target):
         neighbors = neighbors_for_person(current_node.state)
 
         for movie, actor in neighbors:
-            if actor not in explored and not node_queue.contains_state(actor):
+            if actor in explored or node_queue.contains_state(actor):
+                continue
 
-                next_node = Node(actor, current_node, movie)
+            next_node = Node(actor, current_node, movie)
 
-                # Is this where we are trying to get to?
-                if next_node.state == target:
-                    path = []
-                    current_node = next_node
+            # Is this where we are trying to get to?
+            if next_node.state == target:
+                path = []
+                current_node = next_node
 
-                    while current_node.parent is not None:
-                        path.append((current_node.action, current_node.state))
-                        current_node = current_node.parent
+                while current_node.parent is not None:
+                    path.append((current_node.action, current_node.state))
+                    current_node = current_node.parent
 
-                    path.reverse()
-                    return path
+                path.reverse()
+                return path
 
-                node_queue.add(next_node)
+            node_queue.add(next_node)
 
 
 def person_id_for_name(name):
