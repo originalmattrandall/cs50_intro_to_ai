@@ -60,8 +60,7 @@ def result(board, action):
     try:
         board_copy = copy.deepcopy(board)
         board_copy[action[0]][action[1]] = player(board)
-    except Exception as error:
-        print(error)
+    except Exception:
         traceback.print_exc(file=sys.stdout)
 
     return board_copy
@@ -91,8 +90,7 @@ def terminal(board):
     """
     Returns True if game is over, False otherwise.
     """
-    # return False if winner(board) is None else True
-    return not winner(board) is None
+    return bool(winner(board) is not None or len(actions(board)) <= 0)
 
 
 def utility(board):
@@ -142,6 +140,8 @@ def maxmove(board):
 
     for action in actions(board):
         value = max(value, minmove(result(board, action)))
+        if value == 1:
+            return value
 
     return value
 
@@ -157,5 +157,7 @@ def minmove(board):
 
     for action in actions(board):
         value = min(value, maxmove(result(board, action)))
+        if value == -1:
+            return value
 
     return value
