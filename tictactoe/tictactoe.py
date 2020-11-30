@@ -5,6 +5,8 @@ Tic Tac Toe Player
 import math
 import copy
 import numpy
+import sys
+import traceback
 
 X = "X"
 O = "O"
@@ -25,13 +27,16 @@ def player(board):
     Returns player who has the next turn on a board.
     """
     total_x_values = 0
+    total_o_values = 0
 
     for values in board:
         for value in values:
-            if value == "X":
+            if value == X:
                 total_x_values = total_x_values + 1
+            elif value == O:
+                total_o_values = total_o_values + 1
 
-    return O if total_x_values % 2 == 0 else X
+    return O if total_x_values > total_o_values else X
 
 
 def actions(board):
@@ -54,10 +59,10 @@ def result(board, action):
     """
     try:
         board_copy = copy.deepcopy(board)
-        # board_copy[action[0]][action[1]] = player(board)
-        board_copy[action] = player(board)
+        board_copy[action[0]][action[1]] = player(board)
     except Exception as error:
         print(error)
+        traceback.print_exc(file=sys.stdout)
 
     return board_copy
 
@@ -109,44 +114,48 @@ def minimax(board):
         return None
 
     if player(board) == X:
-        return max_move(board)
+        value = -math.inf
+        for action in actions(board):
+            max_value = minmove(result(board, action))
+            if max_value > value:
+                value = max_value
+                best_move = action
     else:
-        return min_move(board)
+        value = math.inf
+        for action in actions(board):
+            min_value = maxmove(result(board, action))
+            if min_value < value:
+                value = min_value
+                best_move = action
+
+    return best_move
 
 
-def max_move(board):
+def maxmove(board):
     """
     Get the max value of a move
     """
-    value = float('-inf')
-    move_to_make = None
+    if terminal(board):
+        return utility(board)
+
+    value = -math.inf
 
     for action in actions(board):
-        min_result = min(result(board, action))
+        value = max(value, minmove(result(board, action)))
 
-        if min_result > value:
-            value = min_result
-            move_to_make = action
-            if value == 1:
-                return move_to_make
-
-    return move_to_make
+    return value
 
 
-def min_move(board):
+def minmove(board):
     """
     Get the min value of a move
     """
-    value = float('inf')
-    move_to_make = None
+    if terminal(board):
+        return utility(board)
+
+    value = math.inf
 
     for action in actions(board):
-        max_result = max(result(board, action))
+        value = min(value, maxmove(result(board, action)))
 
-        if max_result < value:
-            value = max_result
-            move_to_make = action
-            if value == -1:
-                return move_to_make
-
-    return move_to_make
+    return value
