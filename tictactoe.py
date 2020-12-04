@@ -43,14 +43,14 @@ def actions(board):
     """
     Returns set of all possible actions (i, j) available on the board.
     """
-    available_moves = set()
+    empty_spaces = set()
 
     for i in range(len(board)):
         for j in range(len(board[i])):
             if board[i][j] == EMPTY:
-                available_moves.add((i, j))
+                empty_spaces.add((i, j))
 
-    return available_moves
+    return empty_spaces
 
 
 def result(board, action):
@@ -70,6 +70,9 @@ def winner(board):
     """
     Returns the winner of the game, if there is one.
     """
+    # Check center
+    if(board[0][1] == board[1][1] == board[2][1]):
+        return board[0][1]
 
     # Check row and columns
     for new_board in [board, numpy.transpose(board)]:
@@ -97,11 +100,18 @@ def utility(board):
     """
     Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
     """
-    winning_player = winner(board)
-    if winning_player is None:
-        return 0
+    # winning_player = winner(board)
+    # if winning_player is None:
+    #     return 0
 
-    return 1 if winning_player is X else -1
+    # return 1 if winning_player is X else -1
+    if terminal(board):
+        if winner(board) == X:
+            return 1
+        elif winner(board) == O:
+            return -1
+
+    return 0
 
 
 def minimax(board):
@@ -114,14 +124,14 @@ def minimax(board):
     if player(board) == X:
         value = -math.inf
         for action in actions(board):
-            max_value = minmove(result(board, action))
+            max_value = findmin(result(board, action))
             if max_value > value:
                 value = max_value
                 best_move = action
     else:
         value = math.inf
         for action in actions(board):
-            min_value = maxmove(result(board, action))
+            min_value = findmax(result(board, action))
             if min_value < value:
                 value = min_value
                 best_move = action
@@ -129,7 +139,7 @@ def minimax(board):
     return best_move
 
 
-def maxmove(board):
+def findmax(board):
     """
     Get the max value of a move
     """
@@ -139,14 +149,14 @@ def maxmove(board):
     value = -math.inf
 
     for action in actions(board):
-        value = max(value, minmove(result(board, action)))
+        value = max(value, findmin(result(board, action)))
         if value == 1:
             return value
 
     return value
 
 
-def minmove(board):
+def findmin(board):
     """
     Get the min value of a move
     """
@@ -156,7 +166,7 @@ def minmove(board):
     value = math.inf
 
     for action in actions(board):
-        value = min(value, maxmove(result(board, action)))
+        value = min(value, findmax(result(board, action)))
         if value == -1:
             return value
 
